@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import {
   ScrollView,
   StatusBar,
@@ -26,7 +27,7 @@ export default function Index() {
           <Text className="text-white text-3xl font-extrabold">
             <Text style={{ color: colors.accent }}>M</Text>ovies
           </Text>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push("/search")}>
             <Ionicons name="search" size={30} color={colors.text} />
           </TouchableOpacity>
         </View>

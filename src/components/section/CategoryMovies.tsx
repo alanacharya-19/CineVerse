@@ -1,11 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
   Dimensions,
+  FlatList,
   Image,
   Modal,
-  ScrollView,
   Text,
   TouchableOpacity,
   View,
@@ -22,6 +22,8 @@ const GAP = 12;
 const H_PADDING = 16;
 const CARD_W = (width - H_PADDING * 2 - GAP) / 2;
 const CARD_H = CARD_W * 1.5;
+const BTN_GAP = 8;
+const BTN_W = (width - H_PADDING * 2 - BTN_GAP * 2) / 3;
 
 const genreOptions = [
   "Action",
@@ -34,26 +36,49 @@ const genreOptions = [
   "Thriller",
 ];
 
-const ratingOptions = ["1-3", "3-5", "5-7", "7-9", "9-10"];
+const yearOptions = Array.from({ length: 2026 - 1950 + 1 }, (_, i) =>
+  String(2026 - i)
+);
+
+const ratingOptions = Array.from({ length: 9 }, (_, i) => `\u2605 ${i + 1}+`);
 
 type DropdownId = "genre" | "year" | "rating";
+
+const DROPDOWN_LABEL: Record<DropdownId, string> = {
+  genre: "Genre",
+  year: "Year",
+  rating: "Rating",
+};
+
+const resetLabel: Record<DropdownId, string> = {
+  genre: "All Genres",
+  year: "All Years",
+  rating: "All Ratings",
+};
+
+const DROPDOWN_OPTIONS: Record<DropdownId, string[]> = {
+  genre: genreOptions,
+  year: yearOptions,
+  rating: ratingOptions,
+};
+
+const BTN_LEFT: Record<DropdownId, number> = {
+  genre: H_PADDING,
+  year: H_PADDING + BTN_W + BTN_GAP,
+  rating: H_PADDING + (BTN_W + BTN_GAP) * 2,
+};
 
 export default function CategoryMovies({ movies }: Props) {
   const [genre, setGenre] = useState<string | null>(null);
   const [year, setYear] = useState<string | null>(null);
   const [rating, setRating] = useState<string | null>(null);
   const [openDropdown, setOpenDropdown] = useState<DropdownId | null>(null);
+  const [btnTop, setBtnTop] = useState(0);
+  const rowRef = useRef<View>(null);
 
-  const yearOptions = useMemo(() => {
-    const years = new Set<number>();
-    movies.forEach((m) => {
-      const y = parseInt(m.releaseDate.slice(0, 4), 10);
-      if (!isNaN(y)) years.add(y);
-    });
-    return Array.from(years)
-      .sort((a, b) => b - a)
-      .map(String);
-  }, [movies]);
+  const measureTop = () => {
+    rowRef.current?.measureInWindow((x, y) => setBtnTop(y));
+  };
 
   const filtered = useMemo(() => {
     let result = [...movies];
@@ -70,25 +95,28 @@ export default function CategoryMovies({ movies }: Props) {
       result = result.filter((m) => m.releaseDate.startsWith(year));
 
     if (rating) {
-      const [lo, hi] = rating.split("-").map(Number);
-      result = result.filter((m) => m.rating >= lo && m.rating <= hi);
+      const num = parseInt(rating.replace(/\D/g, ""), 10);
+      if (!isNaN(num)) result = result.filter((m) => m.rating >= num && m.rating < num + 1);
     }
 
     return result;
-  }, [movies, sort, genre, year, rating]);
-
-  const items: Record<DropdownId, { options: string[] }> = {
-    sort: { options: sortOptions },
-    genre: { options: genreOptions },
-    year: { options: yearOptions },
-    rating: { options: ratingOptions },
-  };
+  }, [movies, genre, year, rating]);
 
   const currentDisplay: Record<DropdownId, string> = {
-    sort,
-    genre: genre ?? "Genre",
-    year: year ?? "Year",
-    rating: rating ?? "Rating",
+    genre: genre ?? resetLabel.genre,
+    year: year ?? resetLabel.year,
+    rating: rating ?? resetLabel.rating,
+  };
+
+  const getOptions = (id: DropdownId) => {
+    return [resetLabel[id], ...DROPDOWN_OPTIONS[id]];
+  };
+
+  const setFilter = (id: DropdownId, value: string) => {
+    if (id === "genre") setGenre(value === resetLabel.genre ? null : value);
+    else if (id === "year") setYear(value === resetLabel.year ? null : value);
+    else if (id === "rating") setRating(value === resetLabel.rating ? null : value);
+    setOpenDropdown(null);
   };
 
   return (
@@ -98,153 +126,170 @@ export default function CategoryMovies({ movies }: Props) {
       </Text>
 
       {/* ===== DROPDOWN ROW ===== */}
-      <View className="flex-row gap-2 mx-4 mb-4">
-        {(Object.keys(items) as DropdownId[]).map((id) => {
-          const value = currentDisplay[id];
-          return (
-            <TouchableOpacity
-              key={id}
-              activeOpacity={0.7}
-              onPress={() =>
-                setOpenDropdown(openDropdown === id ? null : id)
-              }
-              className="flex-row items-center rounded-xl px-3 py-2.5"
+      <View
+        ref={rowRef}
+        className="flex-row gap-2 mx-4 mb-4"
+      >
+        {(Object.keys(DROPDOWN_OPTIONS) as DropdownId[]).map((id) => (
+          <TouchableOpacity
+            key={id}
+            activeOpacity={0.7}
+            onPress={() => {
+              if (openDropdown !== id) measureTop();
+              setOpenDropdown(openDropdown === id ? null : id);
+            }}
+            className="flex-row items-center justify-between rounded-xl px-3 py-3"
+            style={{
+              width: BTN_W,
+              backgroundColor: colors.card,
+              borderWidth: 1,
+              borderColor:
+                openDropdown === id ? colors.accent : colors.border,
+            }}
+          >
+            <Text
+              className="text-xs"
               style={{
-                backgroundColor: colors.card,
-                borderWidth: 1,
-                borderColor:
-                  openDropdown === id ? colors.accent : colors.border,
+                color:
+                  currentDisplay[id] === resetLabel[id]
+                    ? colors.textDim
+                    : colors.text,
               }}
+              numberOfLines={1}
             >
-              <Text
-                className="text-[11px]"
-                style={{ color: colors.textMuted }}
-                numberOfLines={1}
-              >
-                {value}
-              </Text>
-              <Ionicons
-                name={openDropdown === id ? "chevron-up" : "chevron-down"}
-                size={12}
-                color={colors.textMuted}
-                style={{ marginLeft: 3 }}
-              />
-            </TouchableOpacity>
-          );
-        })}
+              {currentDisplay[id]}
+            </Text>
+            <Ionicons
+              name={openDropdown === id ? "chevron-up" : "chevron-down"}
+              size={14}
+              color={colors.textMuted}
+              style={{ marginLeft: 4 }}
+            />
+          </TouchableOpacity>
+        ))}
       </View>
 
       {/* ===== DROPDOWN MODAL ===== */}
-      <Modal
-        visible={openDropdown !== null}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setOpenDropdown(null)}
-      >
+      <Modal visible={openDropdown !== null} transparent animationType="none" onRequestClose={() => setOpenDropdown(null)}>
         <TouchableOpacity
           className="flex-1"
           activeOpacity={1}
           onPress={() => setOpenDropdown(null)}
         >
-          <View className="flex-1 justify-start pt-28">
-            <View
-              className="mx-4 rounded-2xl overflow-hidden"
-              style={{ backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 }}
-            >
-              <ScrollView bounces={false}>
-                {(openDropdown
-                  ? items[openDropdown].options
-                  : []
-                ).map((option, i, arr) => {
-                  const currentVal = currentDisplay[openDropdown!];
-                  const active = option === currentVal;
-                  return (
-                    <TouchableOpacity
-                      key={option}
-                      activeOpacity={0.6}
-                      onPress={() => {
-                        if (openDropdown === "sort") setSort(option);
-                        else if (openDropdown === "genre")
-                          setGenre(option === "Genre" ? null : option);
-                        else if (openDropdown === "year")
-                          setYear(option === "Year" ? null : option);
-                        else if (openDropdown === "rating")
-                          setRating(option === "Rating" ? null : option);
-                        setOpenDropdown(null);
-                      }}
-                      className="flex-row items-center px-4 py-3.5"
-                      style={{
-                        backgroundColor: active
-                          ? colors.accent + "15"
-                          : "transparent",
-                        borderBottomWidth:
-                          i < arr.length - 1 ? 1 : 0,
-                        borderBottomColor: colors.border,
-                      }}
-                    >
-                      <Text
-                        className="text-sm flex-1"
+          <View className="flex-1">
+            {openDropdown && (
+              <View
+                className="rounded-2xl overflow-hidden"
+                style={{
+                  position: "absolute",
+                  top: btnTop + 52,
+                  left: BTN_LEFT[openDropdown],
+                  width: BTN_W,
+                  backgroundColor: colors.card,
+                  borderColor: colors.border,
+                  borderWidth: 1,
+                  maxHeight: 240,
+                }}
+              >
+                <FlatList
+                  data={getOptions(openDropdown)}
+                  keyExtractor={(item) => item}
+                  nestedScrollEnabled
+                  bounces={false}
+                  showsVerticalScrollIndicator
+                  renderItem={({ item: option, index: i }) => {
+                    const active = option === currentDisplay[openDropdown];
+                    const arr = getOptions(openDropdown);
+                    return (
+                      <TouchableOpacity
+                        activeOpacity={0.6}
+                        onPress={() => setFilter(openDropdown, option)}
+                        className="flex-row items-center px-3"
                         style={{
-                          color: active ? colors.accent : colors.textMuted,
-                          fontWeight: active ? "700" : "400",
+                          height: 44,
+                          backgroundColor: active
+                            ? colors.accent + "15"
+                            : "transparent",
+                          borderBottomWidth: i < arr.length - 1 ? 1 : 0,
+                          borderBottomColor: colors.border,
                         }}
                       >
-                        {option}
-                      </Text>
-                      {active && (
-                        <Ionicons
-                          name="checkmark"
-                          size={16}
-                          color={colors.accent}
-                        />
-                      )}
-                    </TouchableOpacity>
-                  );
-                })}
-              </ScrollView>
-            </View>
+                        <Text
+                          className="text-xs flex-1"
+                          style={{
+                            color: active
+                              ? colors.accent
+                              : colors.textMuted,
+                            fontWeight: active ? "700" : "400",
+                          }}
+                          numberOfLines={1}
+                        >
+                          {option}
+                        </Text>
+                        {active && (
+                          <Ionicons
+                            name="checkmark"
+                            size={14}
+                            color={colors.accent}
+                          />
+                        )}
+                      </TouchableOpacity>
+                    );
+                  }}
+                />
+              </View>
+            )}
           </View>
         </TouchableOpacity>
       </Modal>
 
-      {/* ===== MOVIE GRID ===== */}
-      <View
-        style={{
-          flexDirection: "row",
-          flexWrap: "wrap",
-          paddingHorizontal: H_PADDING,
-          gap: GAP,
-        }}
-      >
-        {filtered.map((movie) => (
-          <TouchableOpacity
-            key={movie.id}
-            activeOpacity={0.8}
-            onPress={() => router.push(`/movie/${movie.id}`)}
-            className="rounded-2xl overflow-hidden"
-            style={{
-              width: CARD_W,
-              height: CARD_H,
-              backgroundColor: colors.card,
-            }}
-          >
-            <Image
-              source={{ uri: movie.poster_path }}
-              className="w-full h-full"
-              resizeMode="cover"
-            />
-            <View className="absolute bottom-0 left-0 right-0 p-3 bg-black/60">
-              <Text className="text-white text-sm font-bold" numberOfLines={1}>
-                {movie.title}
-              </Text>
-              <View className="flex-row items-center gap-1 mt-0.5">
-                <Ionicons name="star" size={11} color={colors.star} />
-                <Text className="text-white text-[10px]">{movie.rating}</Text>
+      {/* ===== MOVIE GRID / EMPTY ===== */}
+      {filtered.length === 0 ? (
+        <View className="items-center py-16">
+          <Ionicons name="film-outline" size={48} color={colors.textVeryDim} />
+          <Text className="text-sm mt-4" style={{ color: colors.textDim }}>
+            No movie available
+          </Text>
+        </View>
+      ) : (
+        <View
+          style={{
+            flexDirection: "row",
+            flexWrap: "wrap",
+            paddingHorizontal: H_PADDING,
+            gap: GAP,
+          }}
+        >
+          {filtered.map((movie) => (
+            <TouchableOpacity
+              key={movie.id}
+              activeOpacity={0.8}
+              onPress={() => router.push(`/movie/${movie.id}`)}
+              className="rounded-2xl overflow-hidden"
+              style={{
+                width: CARD_W,
+                height: CARD_H,
+                backgroundColor: colors.card,
+              }}
+            >
+              <Image
+                source={{ uri: movie.poster_path }}
+                className="w-full h-full"
+                resizeMode="cover"
+              />
+              <View className="absolute bottom-0 left-0 right-0 p-3 bg-black/60">
+                <Text className="text-white text-sm font-bold" numberOfLines={1}>
+                  {movie.title}
+                </Text>
+                <View className="flex-row items-center gap-1 mt-0.5">
+                  <Ionicons name="star" size={11} color={colors.star} />
+                  <Text className="text-white text-[10px]">{movie.rating}</Text>
+                </View>
               </View>
-            </View>
-          </TouchableOpacity>
-        ))}
-      </View>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
     </View>
   );
 }
