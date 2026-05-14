@@ -8,27 +8,33 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { sampleMovies } from "../../sample/data";
+import { upcomingMovies } from "../../sample/upcoming-data";
+import { colors } from "../constants/colors";
 import TrendingMovie from "../components/section/TrendingMovie";
+import UpcomingMovies from "../components/section/UpcomingMovies";
+import CategoryMovies from "../components/section/CategoryMovies";
 
 export default function Index() {
   return (
-    <View className="flex-1 bg-neutral-800">
+    <View className="flex-1" style={{ backgroundColor: colors.background }}>
       <SafeAreaView className="mb-3">
         <StatusBar barStyle="light-content" />
         <View className="flex-row justify-between items-center mx-4">
           <TouchableOpacity>
-            <Ionicons size={30} color="white" name="menu" />
+            <Ionicons name="menu" size={30} color={colors.text} />
           </TouchableOpacity>
           <Text className="text-white text-3xl font-extrabold">
-            <Text className="text-yellow-500">M</Text>ovies
+            <Text style={{ color: colors.accent }}>M</Text>ovies
           </Text>
           <TouchableOpacity>
-            <Ionicons name="search" size={30} color="white" />
+            <Ionicons name="search" size={30} color={colors.text} />
           </TouchableOpacity>
         </View>
       </SafeAreaView>
       <ScrollView showsVerticalScrollIndicator={false}>
         <TrendingMovie movies={sampleMovies} />
+        <UpcomingMovies movies={upcomingMovies} />
+        <CategoryMovies movies={sampleMovies} />
       </ScrollView>
     </View>
   );

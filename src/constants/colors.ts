@@ -1,0 +1,16 @@
+export const colors = {
+  background: "#0a0a0f",
+  card: "#171717",
+  border: "#262626",
+  borderMuted: "#404040",
+  text: "#ffffff",
+  textMuted: "#a3a3a3",
+  textDim: "#737373",
+  textVeryDim: "#525252",
+  accent: "#f472b6",
+  accentDark: "#ec4899",
+  star: "#eab308",
+  purple: "#a78bfa",
+  sky: "#60a5fa",
+  iconBg: "rgba(255,255,255,0.1)",
+} as const;

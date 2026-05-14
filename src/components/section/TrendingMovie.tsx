@@ -1,7 +1,7 @@
 import React from "react";
-import { Dimensions, Text, TouchableOpacity, View } from "react-native";
+import { Dimensions, Text, View } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
-import type { Movie } from "../../../sample/data";
+import type { Movie } from "../../types/movie";
 import MovieCard from "../item/MovieCard";
 
 const { width } = Dimensions.get("window");
@@ -14,12 +14,9 @@ type Props = {
 
 export default function TrendingMovie({ movies }: Props) {
   return (
-    <View className="mb-8">
+    <View className="">
       <View className="flex-row justify-between items-center mx-4 ">
         <Text className="text-white text-2xl font-bold">Trending</Text>
-        <TouchableOpacity>
-          <Text className="text-yellow-500 text-lg">See All</Text>
-        </TouchableOpacity>
       </View>
       <Carousel
         data={movies}
