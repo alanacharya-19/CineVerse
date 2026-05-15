@@ -29,7 +29,7 @@ export default function AboutScreen() {
       </SafeAreaView>
 
       <ScrollView
-        contentContainerClassName="items-center px-6 pb-10"
+        contentContainerStyle={{ alignItems: "center", paddingHorizontal: 24, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
         {/* ===== APP ICON ===== */}
@@ -92,43 +92,6 @@ export default function AboutScreen() {
                 <Text className="text-white text-xs font-medium">
                   {f.label}
                 </Text>
-              </View>
-            ))}
-          </View>
-        </View>
-
-        {/* ===== TECH STACK ===== */}
-        <View className="w-full mt-6">
-          <Text
-            className="text-xs font-semibold uppercase tracking-widest mb-3"
-            style={{ color: colors.textDim }}
-          >
-            Built With
-          </Text>
-          <View
-            className="w-full rounded-2xl p-5"
-            style={{
-              backgroundColor: colors.card,
-              borderColor: colors.border,
-              borderWidth: 1,
-            }}
-          >
-            {[
-              { label: "React Native", icon: "logo-react" },
-              { label: "Expo Router", icon: "navigate" },
-              { label: "TypeScript", icon: "code-slash" },
-              { label: "NativeWind", icon: "color-palette" },
-            ].map((tech, i) => (
-              <View
-                key={tech.label}
-                className="flex-row items-center gap-3 py-2"
-                style={{
-                  borderBottomWidth: i < 3 ? 1 : 0,
-                  borderBottomColor: colors.border,
-                }}
-              >
-                <Ionicons name={tech.icon as any} size={16} color={colors.textMuted} />
-                <Text className="text-white text-sm">{tech.label}</Text>
               </View>
             ))}
           </View>
