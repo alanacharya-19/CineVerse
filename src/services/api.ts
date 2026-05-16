@@ -89,7 +89,7 @@ async function mapMovie(m: TMDBMovie) {
 
 const LANGUAGES = ["en", "hi", "te", "ta", "ml", "kn", "bn", "mr"];
 
-async function fetchMultiLang(endpoint: string, mapFn: (m: TMDBMovie) => Promise<Movie>): Promise<Movie[]> {
+async function fetchInterleaved(endpoint: string): Promise<Movie[]> {
   const results = await Promise.all(
     LANGUAGES.map((lang) =>
       fetchJson<TMDBPage<TMDBMovie>>(
@@ -99,15 +99,16 @@ async function fetchMultiLang(endpoint: string, mapFn: (m: TMDBMovie) => Promise
   );
   const seen = new Set<number>();
   const merged: TMDBMovie[] = [];
-  for (const batch of results) {
-    for (const m of batch) {
-      if (!seen.has(m.id)) {
-        seen.add(m.id);
-        merged.push(m);
+  let maxLen = Math.max(...results.map((r) => r.length));
+  for (let i = 0; i < maxLen; i++) {
+    for (const batch of results) {
+      if (i < batch.length && !seen.has(batch[i].id)) {
+        seen.add(batch[i].id);
+        merged.push(batch[i]);
       }
     }
   }
-  return Promise.all(merged.map(mapFn));
+  return Promise.all(merged.map(mapMovie));
 }
 
 export async function fetchTrending() {
@@ -118,30 +119,39 @@ export async function fetchTrending() {
 }
 
 export async function fetchPopular(): Promise<Movie[]> {
-  return fetchMultiLang("/discover/movie?sort_by=popularity.desc&language=en-US", mapMovie);
+  const year = new Date().getFullYear();
+  const data = await fetchJson<TMDBPage<TMDBMovie>>(
+    `${BASE}/discover/movie?sort_by=popularity.desc&primary_release_year=${year}&language=en-US`
+  );
+  const base = await Promise.all(data.results.map(mapMovie));
+  const extra = await fetchInterleaved(
+    `/discover/movie?sort_by=popularity.desc&primary_release_year=${year}&language=en-US`
+  );
+  const seen = new Set(base.map((m) => m.id));
+  return [...base, ...extra.filter((m) => !seen.has(m.id))];
 }
 
 export async function fetchNowPlaying() {
   const data = await fetchJson<TMDBPage<TMDBMovie>>(
     `${BASE}/movie/now_playing?language=en-US&page=1`
   );
-  const movies = await Promise.all(data.results.map(mapMovie));
-  const ids = new Set(movies.map((m) => m.id));
-  const extra = await fetchMultiLang(
-    `/discover/movie?sort_by=popularity.desc&language=en-US&release_date.lte=${new Date().toISOString().slice(0, 10)}`,
-    mapMovie
-  );
-  return [...movies, ...extra.filter((m) => !ids.has(m.id))];
+  return Promise.all(data.results.map(mapMovie));
 }
 
 export async function fetchUpcoming(): Promise<Movie[]> {
   const today = new Date().toISOString().slice(0, 10);
   const todayDate = new Date();
   todayDate.setHours(23, 59, 59, 999);
-  return fetchMultiLang(
-    `/discover/movie?sort_by=release_date.asc&language=en-US&release_date.gte=${today}`,
-    mapMovie
-  ).then((movies) => movies.filter((m) => m.releaseDate && new Date(m.releaseDate) > todayDate));
+  const data = await fetchJson<TMDBPage<TMDBMovie>>(
+    `${BASE}/discover/movie?sort_by=release_date.asc&language=en-US&release_date.gte=${today}`
+  );
+  const base = await Promise.all(data.results.map(mapMovie));
+  const extra = await fetchInterleaved(
+    `/discover/movie?sort_by=release_date.asc&language=en-US&release_date.gte=${today}`
+  );
+  const seen = new Set(base.map((m) => m.id));
+  const all = [...base, ...extra.filter((m) => !seen.has(m.id))];
+  return all.filter((m) => m.releaseDate && new Date(m.releaseDate) > todayDate);
 }
 
 export async function searchMovies(query: string) {
