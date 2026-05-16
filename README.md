@@ -2,6 +2,16 @@
 
 A React Native (Expo) movie discovery app built with NativeWind and TMDB API. Browse trending films, check out upcoming releases, search through a massive catalog — all in one place.
 
+<p float="left">
+  <img src="./assets/ss/1.jpeg" width="150" />
+  <img src="./assets/ss/2.jpeg" width="150" />
+  <img src="./assets/ss/3.jpeg" width="150" />
+  <img src="./assets/ss/4.jpeg" width="150" />
+  <img src="./assets/ss/5.jpeg" width="150" />
+  <img src="./assets/ss/6.jpeg" width="150" />
+  <img src="./assets/ss/7.jpeg" width="150" />
+</p>
+
 ## What it does
 
 - **Trending** — Popular movies from this year, with a carousel on the home page
