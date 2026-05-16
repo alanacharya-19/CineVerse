@@ -15,7 +15,7 @@ import { colors } from "../constants/colors";
 import CategoryMovies from "../components/section/CategoryMovies";
 import TrendingMovie from "../components/section/TrendingMovie";
 import UpcomingMovies from "../components/section/UpcomingMovies";
-import { fetchPopular, fetchTrendingAll, fetchUpcoming } from "../services/api";
+import { fetchPopular, fetchUpcoming } from "../services/api";
 import type { Movie } from "../types/movie";
 
 const { width } = Dimensions.get("window");
@@ -27,29 +27,26 @@ const menuItems = [
   { label: "Browse Movies", icon: "film" as const, id: "browse" },
   { label: "Support", icon: "headset" as const, id: "support" },
   { label: "About", icon: "information-circle" as const, id: "about" },
-  { label: "Login", icon: "log-in" as const, id: "login" },
 ];
 
 export default function Index() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [trending, setTrending] = useState<Movie[]>([]);
   const [upcoming, setUpcoming] = useState<Movie[]>([]);
-  const [popular, setPopular] = useState<Movie[]>([]);
 
   useEffect(() => {
-    fetchTrendingAll().then(setTrending);
+    fetchPopular().then(setTrending);
     fetchUpcoming().then(setUpcoming);
-    fetchPopular().then(setPopular);
   }, []);
 
   const browseMovies = useMemo(() => {
     const seen = new Set<number>();
-    return [...trending, ...popular, ...upcoming].filter((m) => {
+    return [...trending, ...upcoming].filter((m) => {
       if (seen.has(m.id)) return false;
       seen.add(m.id);
       return true;
     });
-  }, [trending, popular, upcoming]);
+  }, [trending, upcoming]);
 
   const handleMenuPress = (id: string) => {
     setSidebarOpen(false);

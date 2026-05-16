@@ -57,12 +57,12 @@ export default function MovieDetail() {
           title: data.title,
           poster_path: data.poster_path
             ? "https://image.tmdb.org/t/p/w500" + data.poster_path
-            : "",
+            : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==",
           backdrop_path: data.backdrop_path
             ? "https://image.tmdb.org/t/p/w500" + data.backdrop_path
-            : "",
+            : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==",
           rating: Math.round(data.vote_average * 10) / 10,
-          genre: "",
+          genre: data.genres ? data.genres.map((g: { name: string }) => g.name).join(", ") : "",
           duration: "",
           releaseDate: data.release_date || "TBA",
           description: data.overview || "No description available.",
@@ -195,6 +195,20 @@ export default function MovieDetail() {
               </View>
             ))}
           </View>
+
+          {/* ===== GENRES ===== */}
+          {genres.length > 0 && (
+            <View className="flex-row flex-wrap gap-2 mb-5">
+              {genres.map((g) => (
+                <View
+                  key={g}
+                  className="bg-neutral-800 rounded-full px-4 py-2 border border-neutral-700/50"
+                >
+                  <Text className="text-neutral-300 text-xs font-medium">{g}</Text>
+                </View>
+              ))}
+            </View>
+          )}
 
           {/* ===== SYNOPSIS ===== */}
           <View className="mb-5">

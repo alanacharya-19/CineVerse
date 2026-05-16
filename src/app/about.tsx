@@ -1,8 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
-import * as Linking from "expo-linking";
 import { router } from "expo-router";
 import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "../constants/colors";
 
@@ -25,18 +24,12 @@ export default function AboutScreen() {
       <View className="flex-1 items-center justify-center px-8" style={{ marginTop: -60 }}>
         {/* ===== APP ICON WITH GLOW ===== */}
         <View className="items-center mb-5">
-          <View
-            className="w-24 h-24 rounded-2xl items-center justify-center mb-4"
-            style={{
-              backgroundColor: "linear-gradient(135deg, #f472b6, #ec4899)",
-              shadowColor: colors.accent,
-              shadowOffset: { width: 0, height: 8 },
-              shadowOpacity: 0.4,
-              shadowRadius: 20,
-              elevation: 12,
-            }}
-          >
-            <Ionicons name="film" size={44} color="#fff" />
+          <View className="mb-4" style={{ borderRadius: 20, width: 96, height: 96, overflow: "hidden" }}>
+            <Image
+              source={require("../../assets/logo/appLogo.png")}
+              style={{ width: 96, height: 96 }}
+              resizeMode="cover"
+            />
           </View>
           <Text className="text-white text-3xl font-extrabold tracking-tight">
             <Text style={{ color: colors.accent }}>Cine</Text>Verse

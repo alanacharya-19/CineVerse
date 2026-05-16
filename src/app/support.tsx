@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Linking from "expo-linking";
 import { router } from "expo-router";
 import React from "react";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Image, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "../constants/colors";
 
@@ -41,11 +41,12 @@ export default function SupportScreen() {
         className="flex-1 items-center justify-center px-8"
         style={{ marginTop: -60 }}
       >
-        <View
-          className="w-20 h-20 rounded-full items-center justify-center mb-5"
-          style={{ backgroundColor: colors.accent + "18" }}
-        >
-          <Ionicons name="headset" size={36} color={colors.accent} />
+        <View className="mb-5" style={{ borderRadius: 20, width: 80, height: 80, overflow: "hidden" }}>
+          <Image
+            source={require("../../assets/logo/appLogo.png")}
+            style={{ width: 80, height: 80 }}
+            resizeMode="cover"
+          />
         </View>
         <Text className="text-white text-2xl font-bold mb-2">Get in Touch</Text>
         <Text

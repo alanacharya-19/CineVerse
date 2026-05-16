@@ -11,7 +11,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { fetchPopular, fetchTrendingAll, fetchUpcoming } from "../services/api";
+import { fetchPopular, fetchUpcoming } from "../services/api";
 import type { Movie } from "../types/movie";
 import { colors } from "../constants/colors";
 
@@ -64,11 +64,11 @@ export default function BrowseScreen() {
   const rowRef = useRef<View>(null);
 
   useEffect(() => {
-    Promise.all([fetchTrendingAll(), fetchPopular(), fetchUpcoming()]).then(
-      ([trending, popular, upcoming]) => {
+    Promise.all([fetchPopular(), fetchUpcoming()]).then(
+      ([popular, upcoming]) => {
         const seen = new Set<number>();
         setAllMovies(
-          [...trending, ...popular, ...upcoming].filter((m) => {
+          [...popular, ...upcoming].filter((m) => {
             if (seen.has(m.id)) return false;
             seen.add(m.id);
             return true;

@@ -10,7 +10,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { fetchTrendingAll } from "../services/api";
+import { fetchPopular } from "../services/api";
 import type { Movie } from "../types/movie";
 import { colors } from "../constants/colors";
 
@@ -24,7 +24,7 @@ export default function TrendingScreen() {
   const [movies, setMovies] = useState<Movie[]>([]);
 
   useEffect(() => {
-    fetchTrendingAll().then(setMovies);
+    fetchPopular().then(setMovies);
   }, []);
 
   return (

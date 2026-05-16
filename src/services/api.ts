@@ -65,7 +65,9 @@ async function getGenres(): Promise<Map<number, string>> {
 }
 
 function poster(path: string | null) {
-  return path ? IMG + path : "";
+  return path
+    ? IMG + path
+    : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
 }
 
 async function mapMovie(m: TMDBMovie) {
@@ -113,10 +115,6 @@ export async function fetchTrending() {
     `${BASE}/trending/movie/week?language=en-US`
   );
   return Promise.all(data.results.slice(0, 10).map(mapMovie));
-}
-
-export async function fetchTrendingAll(): Promise<Movie[]> {
-  return fetchMultiLang("/discover/movie?sort_by=popularity.desc&language=en-US", mapMovie);
 }
 
 export async function fetchPopular(): Promise<Movie[]> {
