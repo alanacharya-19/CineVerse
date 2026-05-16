@@ -1,50 +1,66 @@
-# Welcome to your Expo app 👋
+# CineVerse 🎬
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A React Native (Expo) movie discovery app built with NativeWind and TMDB API. Browse trending films, check out upcoming releases, search through a massive catalog — all in one place.
+
+## What it does
+
+- **Trending** — Popular movies from this year, with a carousel on the home page
+- **Upcoming** — Films releasing soon, sorted by date
+- **Browse** — Filter by genre, year, or rating
+- **Search** — Find any movie instantly
+- **Details** — Posters, ratings, runtime, synopsis, cast, director/writer with photos, budget & box office
+- **Multi-language** — Movies from English, Hindi, Telugu, Tamil, and more
+- **Dark theme** — Everything is sleek and dark
+
+## Built with
+
+- React Native (Expo)
+- Expo Router (file-based routing)
+- NativeWind (Tailwind for RN)
+- TMDB API
+- TypeScript
 
 ## Get started
 
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
 ```bash
-npm run reset-project
+npm install
+npx expo start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Scan the QR code with Expo Go, or press `a` for Android / `i` for iOS simulator.
 
-## Learn more
+## Environment
 
-To learn more about developing your project with Expo, look at the following resources:
+Create a `.env` file in the root:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```
+EXPO_PUBLIC_TMDB_API_KEY=your_key
+EXPO_PUBLIC_TMDB_ACCESS_TOKEN=your_token
+```
 
-## Join the community
+Get these from [TMDB](https://www.themoviedb.org/settings/api).
 
-Join our community of developers creating universal apps.
+## Project structure
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```
+src/
+├── app/           # Screens (index, search, trending, upcoming, browse, about, movie/[id])
+├── components/
+│   ├── item/      # MovieCard
+│   ├── section/   # TrendingMovie, UpcomingMovies, CategoryMovies
+│   └── ui/        # Skeleton loader
+├── constants/     # Colors
+├── services/      # TMDB API client
+└── types/         # Type definitions
+```
+
+## Notes
+
+- The splash screen uses the app logo on a black background
+- Pull down on the home page to refresh data
+- Loading skeletons appear while fetching
+- Error states have a retry button
+
+---
+
+Developed by Alan - 19
