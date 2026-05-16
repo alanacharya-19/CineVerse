@@ -57,6 +57,7 @@ export default function Index() {
     else if (id === "upcoming") router.push("/upcoming");
     else if (id === "browse") router.push("/browse");
     else if (id === "about") router.push("/about");
+    else if (id === "support") router.push("/support");
   };
 
   return (

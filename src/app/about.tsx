@@ -1,16 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
+import * as Linking from "expo-linking";
 import { router } from "expo-router";
 import React from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "../constants/colors";
-
-const features = [
-  { icon: "trending-up", label: "Trending Movies" },
-  { icon: "calendar", label: "Upcoming Releases" },
-  { icon: "search", label: "Search & Filter" },
-  { icon: "bookmark", label: "Save Favorites" },
-];
 
 export default function AboutScreen() {
   return (
@@ -28,99 +22,64 @@ export default function AboutScreen() {
         </View>
       </SafeAreaView>
 
-      <ScrollView
-        contentContainerStyle={{
-          alignItems: "center",
-          paddingHorizontal: 24,
-          paddingBottom: 40,
-        }}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* ===== APP ICON ===== */}
-        <View
-          className="w-24 h-24 rounded-2xl items-center justify-center mb-4"
-          style={{ backgroundColor: colors.accent + "20" }}
-        >
-          <Ionicons name="film" size={48} color={colors.accent} />
-        </View>
-        <Text className="text-white text-3xl font-extrabold">
-          <Text style={{ color: colors.accent }}>Cine</Text>Verse
-        </Text>
-        <Text
-          className="text-xs font-medium mt-1"
-          style={{ color: colors.textDim }}
-        >
-          Version 1.0.0
-        </Text>
-
-        {/* ===== DESCRIPTION ===== */}
-        <View
-          className="w-full rounded-2xl p-5 mt-6"
-          style={{
-            backgroundColor: colors.card,
-            borderColor: colors.border,
-            borderWidth: 1,
-          }}
-        >
-          <Text
-            className="text-sm leading-7 text-center"
-            style={{ color: colors.textMuted }}
-          >
-            CineVerse is your ultimate destination for discovering films. Browse
-            trending titles, stay updated with upcoming releases, and find your
-            next favorite movie with ease.
-          </Text>
-        </View>
-
-        {/* ===== FEATURES ===== */}
-        <View className="w-full mt-6">
-          <Text
-            className="text-xs font-semibold uppercase tracking-widest mb-3"
-            style={{ color: colors.textDim }}
-          >
-            Features
-          </Text>
-          <View className="flex-row flex-wrap gap-3">
-            {features.map((f) => (
-              <View
-                key={f.label}
-                className="flex-row items-center gap-3 rounded-xl px-4 py-3"
-                style={{
-                  width: "48%",
-                  backgroundColor: colors.card,
-                  borderColor: colors.border,
-                  borderWidth: 1,
-                }}
-              >
-                <Ionicons
-                  name={f.icon as any}
-                  size={18}
-                  color={colors.accent}
-                />
-                <Text className="text-white text-xs font-medium">
-                  {f.label}
-                </Text>
-              </View>
-            ))}
-          </View>
-        </View>
-
-        {/* ===== DEVELOPER ===== */}
-        <View className="w-full mt-8 items-center">
+      <View className="flex-1 items-center justify-center px-8" style={{ marginTop: -60 }}>
+        {/* ===== APP ICON WITH GLOW ===== */}
+        <View className="items-center mb-5">
           <View
-            className="w-16 h-16 rounded-full items-center justify-center mb-3"
-            style={{ backgroundColor: colors.accent + "15" }}
+            className="w-24 h-24 rounded-2xl items-center justify-center mb-4"
+            style={{
+              backgroundColor: "linear-gradient(135deg, #f472b6, #ec4899)",
+              shadowColor: colors.accent,
+              shadowOffset: { width: 0, height: 8 },
+              shadowOpacity: 0.4,
+              shadowRadius: 20,
+              elevation: 12,
+            }}
           >
-            <Ionicons name="code-slash" size={28} color={colors.accent} />
+            <Ionicons name="film" size={44} color="#fff" />
           </View>
-          <Text className="text-white text-lg font-bold">
-            Developed by Alan
+          <Text className="text-white text-3xl font-extrabold tracking-tight">
+            <Text style={{ color: colors.accent }}>Cine</Text>Verse
           </Text>
-          <Text className="text-xs -mt-0.5" style={{ color: colors.textDim }}>
-            - 19
+          <Text className="text-xs mt-1" style={{ color: colors.textVeryDim }}>
+            Version 1.0.0
           </Text>
         </View>
-      </ScrollView>
+
+        {/* ===== TAGLINE ===== */}
+        <Text className="text-sm text-center leading-6 mb-8" style={{ color: colors.textMuted }}>
+          Discover movies from every language, every genre, everywhere.
+        </Text>
+
+        {/* ===== QUICK STATS ===== */}
+        <View
+          className="w-full rounded-2xl px-5 py-4 mb-8 flex-row justify-around"
+          style={{ backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 }}
+        >
+          <View className="items-center">
+            <Text className="text-white text-lg font-extrabold">10K+</Text>
+            <Text className="text-[10px]" style={{ color: colors.textVeryDim }}>Movies</Text>
+          </View>
+          <View className="w-px" style={{ backgroundColor: colors.border }} />
+          <View className="items-center">
+            <Text className="text-white text-lg font-extrabold">8</Text>
+            <Text className="text-[10px]" style={{ color: colors.textVeryDim }}>Languages</Text>
+          </View>
+          <View className="w-px" style={{ backgroundColor: colors.border }} />
+          <View className="items-center">
+            <Text className="text-white text-lg font-extrabold">∞</Text>
+            <Text className="text-[10px]" style={{ color: colors.textVeryDim }}>Unlimited</Text>
+          </View>
+        </View>
+
+        {/* ===== DEV ===== */}
+        <View className="items-center">
+          <View className="w-14 h-14 rounded-full items-center justify-center mb-3" style={{ backgroundColor: colors.accent + "18" }}>
+            <Ionicons name="code-slash" size={24} color={colors.accent} />
+          </View>
+          <Text className="text-white text-base font-bold">Alan - 19</Text>
+        </View>
+      </View>
     </View>
   );
 }
