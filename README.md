@@ -10,6 +10,7 @@ A React Native (Expo) movie discovery app built with NativeWind and TMDB API. Br
   <img src="./assets/ss/5.jpeg" width="150" />
   <img src="./assets/ss/6.jpeg" width="150" />
   <img src="./assets/ss/7.jpeg" width="150" />
+  <img src="./assets/ss/8.jpeg" width="150" />
 </p>
 
 ## What it does
