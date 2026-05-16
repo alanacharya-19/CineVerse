@@ -19,6 +19,8 @@ export type CastMember = {
 export type MovieDetails = {
   director: string;
   writer: string;
+  directorImage: string;
+  writerImage: string;
   budget: string;
   boxOffice: string;
 };

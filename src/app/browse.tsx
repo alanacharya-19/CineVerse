@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Dimensions,
   FlatList,
@@ -10,12 +10,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import type { Movie } from "../../types/movie";
-import { colors } from "../../constants/colors";
-
-type Props = {
-  movies: Movie[];
-};
+import { SafeAreaView } from "react-native-safe-area-context";
+import { fetchPopular, fetchTrendingAll, fetchUpcoming } from "../services/api";
+import type { Movie } from "../types/movie";
+import { colors } from "../constants/colors";
 
 const { width } = Dimensions.get("window");
 const GAP = 12;
@@ -26,14 +24,8 @@ const BTN_GAP = 8;
 const BTN_W = (width - H_PADDING * 2 - BTN_GAP * 2) / 3;
 
 const genreOptions = [
-  "Action",
-  "Adventure",
-  "Comedy",
-  "Crime/Drama",
-  "Fantasy",
-  "History",
-  "Sci-Fi",
-  "Thriller",
+  "Action", "Adventure", "Comedy", "Crime/Drama",
+  "Fantasy", "History", "Sci-Fi", "Thriller",
 ];
 
 const yearOptions = Array.from({ length: 2026 - 1950 + 1 }, (_, i) =>
@@ -43,12 +35,6 @@ const yearOptions = Array.from({ length: 2026 - 1950 + 1 }, (_, i) =>
 const ratingOptions = Array.from({ length: 9 }, (_, i) => `\u2605 ${i + 1}+`);
 
 type DropdownId = "genre" | "year" | "rating";
-
-const DROPDOWN_LABEL: Record<DropdownId, string> = {
-  genre: "Genre",
-  year: "Year",
-  rating: "Rating",
-};
 
 const resetLabel: Record<DropdownId, string> = {
   genre: "All Genres",
@@ -68,7 +54,8 @@ const BTN_LEFT: Record<DropdownId, number> = {
   rating: H_PADDING + (BTN_W + BTN_GAP) * 2,
 };
 
-export default function CategoryMovies({ movies }: Props) {
+export default function BrowseScreen() {
+  const [allMovies, setAllMovies] = useState<Movie[]>([]);
   const [genre, setGenre] = useState<string | null>(null);
   const [year, setYear] = useState<string | null>(null);
   const [rating, setRating] = useState<string | null>(null);
@@ -76,13 +63,23 @@ export default function CategoryMovies({ movies }: Props) {
   const [btnTop, setBtnTop] = useState(0);
   const rowRef = useRef<View>(null);
 
-  const measureTop = () => {
-    rowRef.current?.measureInWindow((x, y) => setBtnTop(y));
-  };
+  useEffect(() => {
+    Promise.all([fetchTrendingAll(), fetchPopular(), fetchUpcoming()]).then(
+      ([trending, popular, upcoming]) => {
+        const seen = new Set<number>();
+        setAllMovies(
+          [...trending, ...popular, ...upcoming].filter((m) => {
+            if (seen.has(m.id)) return false;
+            seen.add(m.id);
+            return true;
+          })
+        );
+      }
+    );
+  }, []);
 
   const filtered = useMemo(() => {
-    let result = [...movies];
-
+    let result = [...allMovies];
     if (genre) {
       if (genre === "Crime/Drama")
         result = result.filter(
@@ -90,17 +87,15 @@ export default function CategoryMovies({ movies }: Props) {
         );
       else result = result.filter((m) => m.genre.includes(genre));
     }
-
     if (year)
       result = result.filter((m) => m.releaseDate.startsWith(year));
-
     if (rating) {
       const num = parseInt(rating.replace(/\D/g, ""), 10);
-      if (!isNaN(num)) result = result.filter((m) => m.rating >= num && m.rating < num + 1);
+      if (!isNaN(num))
+        result = result.filter((m) => m.rating >= num && m.rating < num + 1);
     }
-
     return result;
-  }, [movies, genre, year, rating]);
+  }, [allMovies, genre, year, rating]);
 
   const currentDisplay: Record<DropdownId, string> = {
     genre: genre ?? resetLabel.genre,
@@ -108,9 +103,7 @@ export default function CategoryMovies({ movies }: Props) {
     rating: rating ?? resetLabel.rating,
   };
 
-  const getOptions = (id: DropdownId) => {
-    return [resetLabel[id], ...DROPDOWN_OPTIONS[id]];
-  };
+  const getOptions = (id: DropdownId) => [resetLabel[id], ...DROPDOWN_OPTIONS[id]];
 
   const setFilter = (id: DropdownId, value: string) => {
     if (id === "genre") setGenre(value === resetLabel.genre ? null : value);
@@ -119,63 +112,72 @@ export default function CategoryMovies({ movies }: Props) {
     setOpenDropdown(null);
   };
 
-  return (
-    <View className="mb-8">
-      <View className="flex-row justify-between items-center mx-4 mb-4">
-        <Text className="text-white text-2xl font-bold">Browse Movies</Text>
-        <TouchableOpacity activeOpacity={0.7} onPress={() => router.push("/browse")}>
-          <Text style={{ color: colors.accent }} className="text-sm font-semibold">
-            See All
-          </Text>
-        </TouchableOpacity>
-      </View>
+  const measureTop = () => {
+    rowRef.current?.measureInWindow((x, y) => setBtnTop(y));
+  };
 
-      {/* ===== DROPDOWN ROW ===== */}
-      <View
-        ref={rowRef}
-        className="flex-row gap-2 mx-4 mb-4"
-      >
-        {(Object.keys(DROPDOWN_OPTIONS) as DropdownId[]).map((id) => (
+  return (
+    <View className="flex-1" style={{ backgroundColor: colors.background }}>
+      <SafeAreaView className="mb-3">
+        <View className="flex-row items-center gap-3 mx-4 mb-4">
           <TouchableOpacity
-            key={id}
-            activeOpacity={0.7}
-            onPress={() => {
-              if (openDropdown !== id) measureTop();
-              setOpenDropdown(openDropdown === id ? null : id);
-            }}
-            className="flex-row items-center justify-between rounded-xl px-3 py-3"
-            style={{
-              width: BTN_W,
-              backgroundColor: colors.card,
-              borderWidth: 1,
-              borderColor:
-                openDropdown === id ? colors.accent : colors.border,
-            }}
+            onPress={() => router.back()}
+            className="w-9 h-9 rounded-full items-center justify-center"
+            style={{ backgroundColor: colors.iconBg }}
           >
-            <Text
-              className="text-xs"
-              style={{
-                color:
-                  currentDisplay[id] === resetLabel[id]
-                    ? colors.textDim
-                    : colors.text,
-              }}
-              numberOfLines={1}
-            >
-              {currentDisplay[id]}
-            </Text>
-            <Ionicons
-              name={openDropdown === id ? "chevron-up" : "chevron-down"}
-              size={14}
-              color={colors.textMuted}
-              style={{ marginLeft: 4 }}
-            />
+            <Ionicons name="chevron-back" size={20} color={colors.text} />
           </TouchableOpacity>
-        ))}
-      </View>
+          <Text className="text-white text-xl font-bold">Browse Movies</Text>
+        </View>
+
+        {/* ===== DROPDOWN ROW ===== */}
+        <View ref={rowRef} className="flex-row gap-2 mx-4">
+          {(Object.keys(DROPDOWN_OPTIONS) as DropdownId[]).map((id) => (
+            <TouchableOpacity
+              key={id}
+              activeOpacity={0.7}
+              onPress={() => {
+                if (openDropdown !== id) measureTop();
+                setOpenDropdown(openDropdown === id ? null : id);
+              }}
+              className="flex-row items-center justify-between rounded-xl px-3 py-3"
+              style={{
+                width: BTN_W,
+                backgroundColor: colors.card,
+                borderWidth: 1,
+                borderColor: openDropdown === id ? colors.accent : colors.border,
+              }}
+            >
+              <Text
+                className="text-xs"
+                style={{
+                  color:
+                    currentDisplay[id] === resetLabel[id]
+                      ? colors.textDim
+                      : colors.text,
+                }}
+                numberOfLines={1}
+              >
+                {currentDisplay[id]}
+              </Text>
+              <Ionicons
+                name={openDropdown === id ? "chevron-up" : "chevron-down"}
+                size={14}
+                color={colors.textMuted}
+                style={{ marginLeft: 4 }}
+              />
+            </TouchableOpacity>
+          ))}
+        </View>
+      </SafeAreaView>
 
       {/* ===== DROPDOWN MODAL ===== */}
-      <Modal visible={openDropdown !== null} transparent animationType="none" onRequestClose={() => setOpenDropdown(null)}>
+      <Modal
+        visible={openDropdown !== null}
+        transparent
+        animationType="none"
+        onRequestClose={() => setOpenDropdown(null)}
+      >
         <TouchableOpacity
           className="flex-1"
           activeOpacity={1}
@@ -203,7 +205,7 @@ export default function CategoryMovies({ movies }: Props) {
                   bounces={false}
                   showsVerticalScrollIndicator
                   renderItem={({ item: option, index: i }) => {
-                    const active = option === currentDisplay[openDropdown];
+                    const active = option === currentDisplay[openDropdown!];
                     const arr = getOptions(openDropdown);
                     return (
                       <TouchableOpacity
@@ -212,9 +214,7 @@ export default function CategoryMovies({ movies }: Props) {
                         className="flex-row items-center px-3"
                         style={{
                           height: 44,
-                          backgroundColor: active
-                            ? colors.accent + "15"
-                            : "transparent",
+                          backgroundColor: active ? colors.accent + "15" : "transparent",
                           borderBottomWidth: i < arr.length - 1 ? 1 : 0,
                           borderBottomColor: colors.border,
                         }}
@@ -222,9 +222,7 @@ export default function CategoryMovies({ movies }: Props) {
                         <Text
                           className="text-xs flex-1"
                           style={{
-                            color: active
-                              ? colors.accent
-                              : colors.textMuted,
+                            color: active ? colors.accent : colors.textMuted,
                             fontWeight: active ? "700" : "400",
                           }}
                           numberOfLines={1}
@@ -232,11 +230,7 @@ export default function CategoryMovies({ movies }: Props) {
                           {option}
                         </Text>
                         {active && (
-                          <Ionicons
-                            name="checkmark"
-                            size={14}
-                            color={colors.accent}
-                          />
+                          <Ionicons name="checkmark" size={14} color={colors.accent} />
                         )}
                       </TouchableOpacity>
                     );
@@ -250,27 +244,29 @@ export default function CategoryMovies({ movies }: Props) {
 
       {/* ===== MOVIE GRID / EMPTY ===== */}
       {filtered.length === 0 ? (
-        <View className="items-center py-16">
+        <View className="flex-1 items-center justify-center">
           <Ionicons name="film-outline" size={48} color={colors.textVeryDim} />
           <Text className="text-sm mt-4" style={{ color: colors.textDim }}>
             No movie available
           </Text>
         </View>
       ) : (
-        <View
-          style={{
-            flexDirection: "row",
-            flexWrap: "wrap",
+        <FlatList
+          data={filtered}
+          keyExtractor={(item) => String(item.id)}
+          numColumns={2}
+          contentContainerStyle={{
             paddingHorizontal: H_PADDING,
+            paddingBottom: 24,
             gap: GAP,
           }}
-        >
-          {filtered.map((movie) => (
+          columnWrapperStyle={{ gap: GAP }}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item: movie }) => (
             <TouchableOpacity
-              key={movie.id}
               activeOpacity={0.8}
               onPress={() => router.push(`/movie/${movie.id}`)}
-              className="rounded-2xl overflow-hidden"
+              className="rounded-2xl overflow-hidden mb-4"
               style={{
                 width: CARD_W,
                 height: CARD_H,
@@ -292,8 +288,8 @@ export default function CategoryMovies({ movies }: Props) {
                 </View>
               </View>
             </TouchableOpacity>
-          ))}
-        </View>
+          )}
+        />
       )}
     </View>
   );

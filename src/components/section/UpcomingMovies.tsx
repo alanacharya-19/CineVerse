@@ -17,7 +17,7 @@ export default function UpcomingMovies({ movies }: Props) {
     <View className="mb-8">
       <View className="flex-row justify-between items-center mx-4 mb-4">
         <Text className="text-white text-2xl font-bold">Upcoming Movies</Text>
-        <TouchableOpacity activeOpacity={0.7}>
+        <TouchableOpacity activeOpacity={0.7} onPress={() => router.push("/upcoming")}>
           <Text style={{ color: colors.accent }} className="text-sm font-semibold">
             See All
           </Text>
@@ -45,10 +45,6 @@ export default function UpcomingMovies({ movies }: Props) {
               <Text className="text-white text-sm font-bold" numberOfLines={1}>
                 {movie.title}
               </Text>
-              <View className="flex-row items-center gap-1 mt-0.5">
-                <Ionicons name="star" size={11} color={colors.star} />
-                <Text className="text-white text-[10px]">{movie.rating}</Text>
-              </View>
             </View>
           </TouchableOpacity>
         ))}

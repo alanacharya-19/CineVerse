@@ -29,7 +29,11 @@ export default function AboutScreen() {
       </SafeAreaView>
 
       <ScrollView
-        contentContainerStyle={{ alignItems: "center", paddingHorizontal: 24, paddingBottom: 40 }}
+        contentContainerStyle={{
+          alignItems: "center",
+          paddingHorizontal: 24,
+          paddingBottom: 40,
+        }}
         showsVerticalScrollIndicator={false}
       >
         {/* ===== APP ICON ===== */}
@@ -40,7 +44,7 @@ export default function AboutScreen() {
           <Ionicons name="film" size={48} color={colors.accent} />
         </View>
         <Text className="text-white text-3xl font-extrabold">
-          <Text style={{ color: colors.accent }}>M</Text>ovies
+          <Text style={{ color: colors.accent }}>Cine</Text>Verse
         </Text>
         <Text
           className="text-xs font-medium mt-1"
@@ -62,9 +66,9 @@ export default function AboutScreen() {
             className="text-sm leading-7 text-center"
             style={{ color: colors.textMuted }}
           >
-            Movies is your ultimate destination for discovering films. Browse
-            trending titles, stay updated with upcoming releases, and find
-            your next favorite movie with ease.
+            CineVerse is your ultimate destination for discovering films. Browse
+            trending titles, stay updated with upcoming releases, and find your
+            next favorite movie with ease.
           </Text>
         </View>
 
@@ -88,7 +92,11 @@ export default function AboutScreen() {
                   borderWidth: 1,
                 }}
               >
-                <Ionicons name={f.icon as any} size={18} color={colors.accent} />
+                <Ionicons
+                  name={f.icon as any}
+                  size={18}
+                  color={colors.accent}
+                />
                 <Text className="text-white text-xs font-medium">
                   {f.label}
                 </Text>

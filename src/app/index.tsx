@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Dimensions,
   Modal,
@@ -11,12 +11,12 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { sampleMovies } from "../../sample/data";
-import { upcomingMovies } from "../../sample/upcoming-data";
+import { colors } from "../constants/colors";
 import CategoryMovies from "../components/section/CategoryMovies";
 import TrendingMovie from "../components/section/TrendingMovie";
 import UpcomingMovies from "../components/section/UpcomingMovies";
-import { colors } from "../constants/colors";
+import { fetchPopular, fetchTrendingAll, fetchUpcoming } from "../services/api";
+import type { Movie } from "../types/movie";
 
 const { width } = Dimensions.get("window");
 const SIDEBAR_W = width * 0.72;
@@ -32,12 +32,30 @@ const menuItems = [
 
 export default function Index() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [trending, setTrending] = useState<Movie[]>([]);
+  const [upcoming, setUpcoming] = useState<Movie[]>([]);
+  const [popular, setPopular] = useState<Movie[]>([]);
+
+  useEffect(() => {
+    fetchTrendingAll().then(setTrending);
+    fetchUpcoming().then(setUpcoming);
+    fetchPopular().then(setPopular);
+  }, []);
+
+  const browseMovies = useMemo(() => {
+    const seen = new Set<number>();
+    return [...trending, ...popular, ...upcoming].filter((m) => {
+      if (seen.has(m.id)) return false;
+      seen.add(m.id);
+      return true;
+    });
+  }, [trending, popular, upcoming]);
 
   const handleMenuPress = (id: string) => {
     setSidebarOpen(false);
-    if (id === "trending") router.push("/search");
-    else if (id === "upcoming") router.push("/search");
-    else if (id === "browse") router.push("/search");
+    if (id === "trending") router.push("/trending");
+    else if (id === "upcoming") router.push("/upcoming");
+    else if (id === "browse") router.push("/browse");
     else if (id === "about") router.push("/about");
   };
 
@@ -50,7 +68,7 @@ export default function Index() {
             <Ionicons name="menu" size={30} color={colors.text} />
           </TouchableOpacity>
           <Text className="text-white text-3xl font-extrabold">
-            <Text style={{ color: colors.accent }}>M</Text>ovies
+            <Text style={{ color: colors.accent }}>C</Text>ineVerse
           </Text>
           <TouchableOpacity onPress={() => router.push("/search")}>
             <Ionicons name="search" size={30} color={colors.text} />
@@ -58,9 +76,9 @@ export default function Index() {
         </View>
       </SafeAreaView>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <TrendingMovie movies={sampleMovies} />
-        <UpcomingMovies movies={upcomingMovies} />
-        <CategoryMovies movies={sampleMovies} />
+        <TrendingMovie movies={trending} />
+        <UpcomingMovies movies={upcoming} />
+        <CategoryMovies movies={browseMovies} />
       </ScrollView>
 
       {/* ===== SIDEBAR ===== */}
@@ -79,9 +97,8 @@ export default function Index() {
               paddingHorizontal: 24,
             }}
           >
-           
             <Text className="text-white text-2xl font-extrabold mb-8">
-              <Text style={{ color: colors.accent }}>M</Text>ovies
+              <Text style={{ color: colors.accent }}>C</Text>ineVerse
             </Text>
             {menuItems.map((item, i) => (
               <TouchableOpacity

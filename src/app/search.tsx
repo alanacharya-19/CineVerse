@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useState } from "react";
 import {
   Dimensions,
   FlatList,
@@ -11,7 +11,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { sampleMovies } from "../../sample/data";
+import { searchMovies } from "../services/api";
 import { colors } from "../constants/colors";
 import type { Movie } from "../types/movie";
 
@@ -23,15 +23,16 @@ const CARD_H = CARD_W * 1.5;
 
 export default function SearchScreen() {
   const [query, setQuery] = useState("");
-  const inputRef = useRef<TextInput>(null);
+  const [results, setResults] = useState<Movie[]>([]);
 
-  const results = useMemo(() => {
-    if (!query.trim()) return [];
-    const q = query.toLowerCase();
-    return sampleMovies.filter((m: Movie) =>
-      m.title.toLowerCase().includes(q)
-    );
-  }, [query]);
+  const handleSearch = (text: string) => {
+    setQuery(text);
+    if (!text.trim()) {
+      setResults([]);
+      return;
+    }
+    searchMovies(text).then(setResults);
+  };
 
   return (
     <View className="flex-1" style={{ backgroundColor: colors.background }}>
@@ -53,11 +54,10 @@ export default function SearchScreen() {
             }}
           >
             <TextInput
-              ref={inputRef}
               placeholder="Search movies..."
               placeholderTextColor={colors.textVeryDim}
               value={query}
-              onChangeText={setQuery}
+              onChangeText={handleSearch}
               autoFocus
               className="text-white text-sm"
               style={{ color: colors.text }}
@@ -70,7 +70,7 @@ export default function SearchScreen() {
         <View className="flex-1 items-center justify-center">
           <Ionicons name="search-outline" size={48} color={colors.textVeryDim} />
           <Text className="text-sm mt-4" style={{ color: colors.textDim }}>
-            No movies found
+            {query.trim() ? "No movies found" : "Search for your favorite movies"}
           </Text>
         </View>
       ) : (
@@ -78,16 +78,17 @@ export default function SearchScreen() {
           data={results}
           keyExtractor={(item) => String(item.id)}
           numColumns={2}
-          contentContainerStyle={{ paddingHorizontal: H_PADDING, gap: GAP }}
+          contentContainerStyle={{
+            paddingHorizontal: H_PADDING,
+            paddingBottom: 24,
+            gap: GAP,
+          }}
           columnWrapperStyle={{ gap: GAP }}
           showsVerticalScrollIndicator={false}
           renderItem={({ item: movie }) => (
             <TouchableOpacity
-              key={movie.id}
               activeOpacity={0.8}
-              onPress={() => {
-                router.push(`/movie/${movie.id}`);
-              }}
+              onPress={() => router.push(`/movie/${movie.id}`)}
               className="rounded-2xl overflow-hidden mb-4"
               style={{
                 width: CARD_W,

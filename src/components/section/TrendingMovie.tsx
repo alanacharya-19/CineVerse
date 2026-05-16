@@ -1,5 +1,7 @@
+import { router } from "expo-router";
 import React from "react";
-import { Dimensions, Text, View } from "react-native";
+import { Dimensions, Text, TouchableOpacity, View } from "react-native";
+import { colors } from "../../constants/colors";
 import Carousel from "react-native-reanimated-carousel";
 import type { Movie } from "../../types/movie";
 import MovieCard from "../item/MovieCard";
@@ -17,6 +19,11 @@ export default function TrendingMovie({ movies }: Props) {
     <View className="">
       <View className="flex-row justify-between items-center mx-4 ">
         <Text className="text-white text-2xl font-bold">Trending</Text>
+        <TouchableOpacity activeOpacity={0.7} onPress={() => router.push("/trending")}>
+          <Text style={{ color: colors.accent }} className="text-sm font-semibold">
+            See All
+          </Text>
+        </TouchableOpacity>
       </View>
       <Carousel
         data={movies}
