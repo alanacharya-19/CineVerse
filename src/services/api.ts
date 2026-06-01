@@ -164,7 +164,7 @@ export async function searchMovies(query: string, page = 1) {
 }
 
 export async function fetchMovieCredits(movieId: number) {
-  const data = await fetchJson<TMDBCredits>(
+  const data = await fetchJson<TMDBCredits & { cast: { id: number; name: string; character: string; profile_path: string | null }[] }>(
     `${BASE}/movie/${movieId}/credits?language=en-US`
   );
   const director =
@@ -177,11 +177,18 @@ export async function fetchMovieCredits(movieId: number) {
   const wrImage =
     data.crew.find((c) => c.job === "Screenplay")?.profile_path ??
     data.crew.find((c) => c.job === "Writer")?.profile_path;
+  const cast = data.cast.slice(0, 8).map((c) => ({
+    id: c.id,
+    name: c.name,
+    character: c.character,
+    image: poster(c.profile_path),
+  }));
   return {
     director,
     writer,
     directorImage: poster(dirImage ?? null),
     writerImage: poster(wrImage ?? null),
+    cast,
   };
 }
 
@@ -286,4 +293,39 @@ export async function fetchSimilarMovies(movieId: number): Promise<Movie[]> {
     return Promise.all(fallback.results.slice(0, 6).map(mapMovie));
   }
   return Promise.all(data.results.slice(0, 6).map(mapMovie));
+}
+
+// ─── Person / Cast ───
+
+export async function fetchPersonDetails(personId: number) {
+  const data = await fetchJson<{
+    name: string;
+    biography: string;
+    profile_path: string | null;
+    birthplace: string;
+    known_for_department: string;
+  }>(`${BASE}/person/${personId}?language=en-US`);
+  return {
+    name: data.name,
+    bio: data.biography || "No biography available.",
+    image: poster(data.profile_path),
+    birthplace: data.birthplace || "Unknown",
+    department: data.known_for_department || "Actor",
+  };
+}
+
+export async function fetchPersonCredits(personId: number) {
+  const data = await fetchJson<{
+    cast: { id: number; title: string; poster_path: string | null; release_date: string; character: string; vote_average: number }[];
+  }>(`${BASE}/person/${personId}/movie_credits?language=en-US`);
+  return data.cast
+    .filter((m) => m.poster_path)
+    .slice(0, 20)
+    .map((m) => ({
+      id: m.id,
+      title: m.title,
+      poster_path: poster(m.poster_path),
+      rating: Math.round(m.vote_average * 10) / 10,
+      releaseDate: m.release_date || "TBA",
+    }));
 }

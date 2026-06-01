@@ -62,11 +62,15 @@ export default function BrowseScreen() {
   const [rating, setRating] = useState<string | null>(null);
   const [openDropdown, setOpenDropdown] = useState<DropdownId | null>(null);
   const [btnTop, setBtnTop] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const rowRef = useRef<View>(null);
 
   useEffect(() => {
-    Promise.all([fetchPopular(), fetchUpcoming()]).then(
-      ([popular, upcoming]) => {
+    setLoading(true);
+    setError(false);
+    Promise.all([fetchPopular(), fetchUpcoming()])
+      .then(([popular, upcoming]) => {
         const seen = new Set<number>();
         setAllMovies(
           [...popular, ...upcoming].filter((m) => {
@@ -75,8 +79,9 @@ export default function BrowseScreen() {
             return true;
           })
         );
-      }
-    );
+      })
+      .catch(() => setError(true))
+      .finally(() => setLoading(false));
   }, []);
 
   const filtered = useMemo(() => {
@@ -243,8 +248,40 @@ export default function BrowseScreen() {
         </TouchableOpacity>
       </Modal>
 
-      {/* ===== MOVIE GRID / EMPTY ===== */}
-      {filtered.length === 0 ? (
+      {/* ===== LOADING ===== */}
+      {loading ? (
+        <View className="flex-row flex-wrap px-4 gap-3 mt-4">
+          {[1, 2, 3, 4].map((i) => (
+            <View key={i} className="rounded-2xl" style={{ width: CARD_W, height: CARD_H, backgroundColor: colors.card }}>
+              <View className="flex-1 items-center justify-center">
+                <Ionicons name="film-outline" size={24} color={colors.textVeryDim} />
+              </View>
+            </View>
+          ))}
+        </View>
+      ) : error ? (
+        <View className="flex-1 items-center justify-center">
+          <Ionicons name="cloud-offline-outline" size={48} color={colors.textVeryDim} />
+          <Text className="text-sm mt-4 mb-4" style={{ color: colors.textDim }}>Failed to load</Text>
+          <TouchableOpacity onPress={() => {
+            setLoading(true);
+            setError(false);
+            Promise.all([fetchPopular(), fetchUpcoming()])
+              .then(([popular, upcoming]) => {
+                const seen = new Set<number>();
+                setAllMovies([...popular, ...upcoming].filter((m) => {
+                  if (seen.has(m.id)) return false;
+                  seen.add(m.id);
+                  return true;
+                }));
+              })
+              .catch(() => setError(true))
+              .finally(() => setLoading(false));
+          }} className="rounded-xl px-5 py-2" style={{ backgroundColor: colors.accent + "20" }}>
+            <Text className="text-sm font-semibold" style={{ color: colors.accent }}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      ) : filtered.length === 0 ? (
         <View className="flex-1 items-center justify-center">
           <Ionicons name="film-outline" size={48} color={colors.textVeryDim} />
           <Text className="text-sm mt-4" style={{ color: colors.textDim }}>

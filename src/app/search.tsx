@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Dimensions,
   FlatList,
   Image,
@@ -25,15 +26,62 @@ export default function SearchScreen() {
   const { currentColors: colors } = useSettings();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Movie[]>([]);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const queryRef = useRef(query);
 
-  const handleSearch = (text: string) => {
-    setQuery(text);
-    if (!text.trim()) {
+  const doSearch = useCallback(async (q: string, p: number) => {
+    if (!q.trim()) {
       setResults([]);
       return;
     }
-    searchMovies(text).then(setResults);
+    try {
+      const data = await searchMovies(q, p);
+      if (queryRef.current !== q) return;
+      if (p === 1) setResults(data);
+      else setResults((prev) => [...prev, ...data]);
+      setPage(p);
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    queryRef.current = query;
+  }, [query]);
+
+  const handleSearch = (text: string) => {
+    setQuery(text);
+    setLoading(true);
+    setPage(1);
+    doSearch(text, 1);
   };
+
+  const handleEndReached = () => {
+    if (loadingMore || !query.trim()) return;
+    setLoadingMore(true);
+    doSearch(query, page + 1);
+  };
+
+  const renderMovie = ({ item: movie }: { item: Movie }) => (
+    <TouchableOpacity
+      activeOpacity={0.8}
+      onPress={() => router.push(`/movie/${movie.id}`)}
+      className="rounded-2xl overflow-hidden mb-4"
+      style={{ width: CARD_W, height: CARD_H, backgroundColor: colors.card }}
+    >
+      <Image source={{ uri: movie.poster_path }} className="w-full h-full" resizeMode="cover" />
+      <View className="absolute bottom-0 left-0 right-0 p-3 bg-black/60">
+        <Text className="text-white text-sm font-bold" numberOfLines={1}>{movie.title}</Text>
+        <View className="flex-row items-center gap-1 mt-0.5">
+          <Ionicons name="star" size={11} color={colors.star} />
+          <Text className="text-white text-[10px]">{movie.rating}</Text>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
 
   return (
     <View className="flex-1" style={{ backgroundColor: colors.background }}>
@@ -67,7 +115,7 @@ export default function SearchScreen() {
         </View>
       </SafeAreaView>
 
-      {results.length === 0 ? (
+      {results.length === 0 && !loading ? (
         <View className="flex-1 items-center justify-center">
           <Ionicons name="search-outline" size={48} color={colors.textVeryDim} />
           <Text className="text-sm mt-4" style={{ color: colors.textDim }}>
@@ -79,40 +127,17 @@ export default function SearchScreen() {
           data={results}
           keyExtractor={(item) => String(item.id)}
           numColumns={2}
-          contentContainerStyle={{
-            paddingHorizontal: H_PADDING,
-            paddingBottom: 24,
-            gap: GAP,
-          }}
+          contentContainerStyle={{ paddingHorizontal: H_PADDING, paddingBottom: 24, gap: GAP }}
           columnWrapperStyle={{ gap: GAP }}
           showsVerticalScrollIndicator={false}
-          renderItem={({ item: movie }) => (
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={() => router.push(`/movie/${movie.id}`)}
-              className="rounded-2xl overflow-hidden mb-4"
-              style={{
-                width: CARD_W,
-                height: CARD_H,
-                backgroundColor: colors.card,
-              }}
-            >
-              <Image
-                source={{ uri: movie.poster_path }}
-                className="w-full h-full"
-                resizeMode="cover"
-              />
-              <View className="absolute bottom-0 left-0 right-0 p-3 bg-black/60">
-                <Text className="text-white text-sm font-bold" numberOfLines={1}>
-                  {movie.title}
-                </Text>
-                <View className="flex-row items-center gap-1 mt-0.5">
-                  <Ionicons name="star" size={11} color={colors.star} />
-                  <Text className="text-white text-[10px]">{movie.rating}</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-          )}
+          renderItem={renderMovie}
+          onEndReached={handleEndReached}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            loadingMore ? (
+              <View className="py-6 items-center"><ActivityIndicator size="small" color={colors.accent} /></View>
+            ) : null
+          }
         />
       )}
     </View>

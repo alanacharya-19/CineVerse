@@ -32,6 +32,7 @@ export default function MovieDetail() {
   const [writer, setWriter] = useState("N/A");
   const [directorImage, setDirectorImage] = useState("");
   const [writerImage, setWriterImage] = useState("");
+  const [cast, setCast] = useState<{ id: number; name: string; character: string; image: string }[]>([]);
   const [duration, setDuration] = useState("N/A");
   const [budget, setBudget] = useState("N/A");
   const [boxOffice, setBoxOffice] = useState("N/A");
@@ -45,6 +46,7 @@ export default function MovieDetail() {
       setWriter(c.writer);
       setDirectorImage(c.directorImage);
       setWriterImage(c.writerImage);
+      setCast(c.cast);
     });
     fetchMovieRuntime(movieId).then((r) => {
       setDuration(r.duration);
@@ -303,6 +305,35 @@ export default function MovieDetail() {
               </View>
             )}
           </View>
+
+          {/* ===== CAST ===== */}
+          {cast.length > 0 && (
+            <View className="mb-5">
+              <Text className="text-neutral-400 text-sm font-semibold mb-3">Cast</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-5">
+                <View className="flex-row gap-4 px-5">
+                  {cast.map((person) => (
+                    <TouchableOpacity
+                      key={person.id}
+                      className="items-center"
+                      style={{ width: 72 }}
+                      onPress={() => router.push(`/cast/${person.id}`)}
+                    >
+                      <View className="w-16 h-16 rounded-full overflow-hidden border-2 border-neutral-700/50">
+                        <Image source={{ uri: person.image }} className="w-full h-full" resizeMode="cover" />
+                      </View>
+                      <Text className="text-neutral-300 text-xs mt-2 text-center font-medium leading-4" numberOfLines={2}>
+                        {person.name}
+                      </Text>
+                      <Text className="text-neutral-600 text-[9px] text-center mt-0.5" numberOfLines={1}>
+                        {person.character}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </ScrollView>
+            </View>
+          )}
 
           {/* ===== MORE LIKE THIS ===== */}
           {related.length > 0 && (
