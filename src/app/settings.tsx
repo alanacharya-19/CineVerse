@@ -1,9 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import React, { useState } from "react";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSettings } from "../context/SettingsContext";
+import { requestPermission } from "../services/notifications";
 import { colors } from "../constants/colors";
 
 const LANGUAGES = [
@@ -19,6 +20,7 @@ const LANGUAGES = [
 
 export default function SettingsScreen() {
   const { settings, setTheme, setLanguage } = useSettings();
+  const [permGranted, setPermGranted] = useState(false);
 
   return (
     <View className="flex-1" style={{ backgroundColor: colors.background }}>
@@ -84,6 +86,49 @@ export default function SettingsScreen() {
                 }}
               />
             </View>
+          </TouchableOpacity>
+        </View>
+
+        {/* ===== NOTIFICATIONS ===== */}
+        <Text className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: colors.textDim }}>
+          Notifications
+        </Text>
+        <View
+          className="rounded-2xl overflow-hidden mb-8"
+          style={{
+            backgroundColor: colors.card,
+            borderColor: colors.border,
+            borderWidth: 1,
+          }}
+        >
+          <TouchableOpacity
+            activeOpacity={0.6}
+            onPress={async () => {
+              const ok = await requestPermission();
+              setPermGranted(ok);
+              Alert.alert(
+                ok ? "Permission Granted" : "Permission Denied",
+                ok
+                  ? "You will now receive reminders for upcoming movies."
+                  : "Enable notifications in your device settings to get movie reminders."
+              );
+            }}
+            className="flex-row items-center px-4"
+            style={{ height: 56 }}
+          >
+            <View
+              className="w-9 h-9 rounded-xl items-center justify-center mr-3"
+              style={{ backgroundColor: colors.iconBg }}
+            >
+              <Ionicons name="notifications" size={18} color={colors.text} />
+            </View>
+            <View className="flex-1">
+              <Text className="text-white text-sm font-medium">Movie Reminders</Text>
+              <Text className="text-xs" style={{ color: colors.textDim }}>
+                Get notified when upcoming movies release
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={16} color={colors.textVeryDim} />
           </TouchableOpacity>
         </View>
 

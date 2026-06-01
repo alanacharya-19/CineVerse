@@ -25,6 +25,7 @@ export default function MovieDetail() {
   const { id } = useLocalSearchParams();
   const navigation = useNavigation();
   const { toggleFavorite, isFavorite } = useFavorites();
+  const [notified, setNotified] = useState(false);
   const [movie, setMovie] = useState<Movie | null>(null);
   const [director, setDirector] = useState("N/A");
   const [writer, setWriter] = useState("N/A");
@@ -149,7 +150,7 @@ export default function MovieDetail() {
             </View>
           </View>
 
-          {/* ===== PLAY/SOON + SHARE ===== */}
+          {/* ===== PLAY/SOON + NOTIFY + SHARE ===== */}
           <View className="flex-row gap-3 mb-5">
             <TouchableOpacity
               className="flex-[2] rounded-xl py-3.5 flex-row items-center justify-center gap-2"
@@ -172,6 +173,41 @@ export default function MovieDetail() {
                 {isUpcoming ? "Coming Soon" : "Play"}
               </Text>
             </TouchableOpacity>
+            {isUpcoming && (
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={async () => {
+                  if (notified) {
+                    await cancelNotification(movie.id);
+                    setNotified(false);
+                  } else {
+                    const ok = await scheduleReleaseNotification(
+                      movie.id,
+                      movie.title,
+                      movie.releaseDate
+                    );
+                    if (ok) setNotified(true);
+                  }
+                }}
+                className="flex-1 rounded-xl py-3.5 flex-row items-center justify-center gap-2 border"
+                style={{
+                  backgroundColor: notified ? colors.accent + "25" : colors.card,
+                  borderColor: notified ? colors.accent : colors.border,
+                }}
+              >
+                <Ionicons
+                  name={notified ? "notifications" : "notifications-outline"}
+                  size={18}
+                  color={notified ? colors.accent : colors.textMuted}
+                />
+                <Text
+                  className="text-sm font-medium"
+                  style={{ color: notified ? colors.accent : colors.textMuted }}
+                >
+                  {notified ? "Notifying" : "Notify"}
+                </Text>
+              </TouchableOpacity>
+            )}
             <TouchableOpacity className="flex-1 bg-neutral-800 rounded-xl py-3.5 flex-row items-center justify-center gap-2 border border-neutral-700/50">
               <Ionicons name="share-outline" size={18} color="white" />
               <Text className="text-white text-sm font-medium">Share</Text>
