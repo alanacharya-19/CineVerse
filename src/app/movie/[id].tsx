@@ -11,6 +11,10 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { fetchMovieCredits, fetchMovieRuntime, fetchSimilarMovies } from "../../services/api";
+import {
+  scheduleReleaseNotification,
+  cancelNotification,
+} from "../../services/notifications";
 import type { Movie } from "../../types/movie";
 import { colors } from "../../constants/colors";
 import { useFavorites } from "../../context/FavoritesContext";
