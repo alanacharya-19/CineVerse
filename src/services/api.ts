@@ -205,6 +205,74 @@ export async function fetchMovieDetails(movieId: number) {
   return { ...credits, ...runtime };
 }
 
+// ─── TV Shows ───
+
+type TMDBTVShow = {
+  id: number;
+  name: string;
+  poster_path: string | null;
+  backdrop_path: string | null;
+  vote_average: number;
+  genre_ids: number[];
+  first_air_date: string;
+  overview: string;
+  number_of_seasons?: number;
+  number_of_episodes?: number;
+  status?: string;
+  created_by?: { name: string; profile_path: string | null }[];
+};
+
+async function mapTVShow(t: TMDBTVShow) {
+  const genres = await getGenres();
+  return {
+    id: t.id,
+    title: t.name,
+    poster_path: poster(t.poster_path),
+    backdrop_path: poster(t.backdrop_path),
+    rating: Math.round(t.vote_average * 10) / 10,
+    genre: t.genre_ids.map((id) => genres.get(id) ?? "Unknown").join(", "),
+    seasons: t.number_of_seasons ? `${t.number_of_seasons}` : "N/A",
+    episodes: t.number_of_episodes ? `${t.number_of_episodes}` : "N/A",
+    releaseDate: t.first_air_date || "TBA",
+    description: t.overview || "No description available.",
+  };
+}
+
+export async function fetchTrendingTV() {
+  const data = await fetchJson<TMDBPage<TMDBTVShow>>(
+    `${BASE}/trending/tv/week?language=en-US`
+  );
+  return Promise.all(data.results.map(mapTVShow));
+}
+
+export async function fetchTVDetails(tvId: number) {
+  const data = await fetchJson<TMDBTVShow & { credits: TMDBCredits }>(
+    `${BASE}/tv/${tvId}?language=en-US`
+  );
+  const creator = data.created_by?.[0]?.name ?? "Unknown";
+  const creatorImage = poster(data.created_by?.[0]?.profile_path ?? null);
+  return {
+    creator,
+    creatorImage,
+    seasons: data.number_of_seasons ?? 0,
+    episodes: data.number_of_episodes ?? 0,
+    status: data.status ?? "N/A",
+  };
+}
+
+export async function fetchSimilarTV(tvId: number) {
+  const data = await fetchJson<TMDBPage<TMDBTVShow>>(
+    `${BASE}/tv/${tvId}/recommendations?language=en-US&page=1`
+  );
+  if (data.results.length === 0) {
+    const fallback = await fetchJson<TMDBPage<TMDBTVShow>>(
+      `${BASE}/tv/${tvId}/similar?language=en-US&page=1`
+    );
+    return Promise.all(fallback.results.slice(0, 6).map(mapTVShow));
+  }
+  return Promise.all(data.results.slice(0, 6).map(mapTVShow));
+}
+
 export async function fetchSimilarMovies(movieId: number): Promise<Movie[]> {
   const data = await fetchJson<TMDBPage<TMDBMovie>>(
     `${BASE}/movie/${movieId}/recommendations?language=en-US&page=1`

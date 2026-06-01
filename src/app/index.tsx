@@ -28,6 +28,7 @@ const menuItems = [
   { label: "Now Playing", icon: "play" as const, id: "nowplaying" },
   { label: "Upcoming", icon: "calendar" as const, id: "upcoming" },
   { label: "Browse Movies", icon: "film" as const, id: "browse" },
+  { label: "TV Shows", icon: "tv" as const, id: "tv" },
   { label: "Favorites", icon: "heart" as const, id: "favorites" },
   { label: "Settings", icon: "settings" as const, id: "settings" },
   { label: "About & Help", icon: "information-circle" as const, id: "about" },
@@ -82,6 +83,7 @@ export default function Index() {
     else if (id === "nowplaying") router.push("/nowplaying");
     else if (id === "upcoming") router.push("/upcoming");
     else if (id === "browse") router.push("/browse");
+    else if (id === "tv") router.push("/tv");
     else if (id === "favorites") router.push("/favorites");
     else if (id === "settings") router.push("/settings");
     else if (id === "about") router.push("/about");
