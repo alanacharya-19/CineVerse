@@ -16,14 +16,15 @@ import {
   cancelNotification,
 } from "../../services/notifications";
 import type { Movie } from "../../types/movie";
-import { colors } from "../../constants/colors";
 import { useFavorites } from "../../context/FavoritesContext";
+import { useSettings } from "../../context/SettingsContext";
 
 const { width, height } = Dimensions.get("window");
 
 export default function MovieDetail() {
   const { id } = useLocalSearchParams();
   const navigation = useNavigation();
+  const { currentColors: colors } = useSettings();
   const { toggleFavorite, isFavorite } = useFavorites();
   const [notified, setNotified] = useState(false);
   const [movie, setMovie] = useState<Movie | null>(null);

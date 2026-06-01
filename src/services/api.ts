@@ -118,11 +118,12 @@ export async function fetchTrending() {
   return Promise.all(data.results.slice(0, 10).map(mapMovie));
 }
 
-export async function fetchPopular(): Promise<Movie[]> {
+export async function fetchPopular(page = 1): Promise<Movie[]> {
   const year = new Date().getFullYear();
   const data = await fetchJson<TMDBPage<TMDBMovie>>(
-    `${BASE}/discover/movie?sort_by=popularity.desc&primary_release_year=${year}&language=en-US`
+    `${BASE}/discover/movie?sort_by=popularity.desc&primary_release_year=${year}&language=en-US&page=${page}`
   );
+  if (page > 1) return Promise.all(data.results.map(mapMovie));
   const base = await Promise.all(data.results.map(mapMovie));
   const extra = await fetchInterleaved(
     `/discover/movie?sort_by=popularity.desc&primary_release_year=${year}&language=en-US`
@@ -131,20 +132,21 @@ export async function fetchPopular(): Promise<Movie[]> {
   return [...base, ...extra.filter((m) => !seen.has(m.id))];
 }
 
-export async function fetchNowPlaying() {
+export async function fetchNowPlaying(page = 1) {
   const data = await fetchJson<TMDBPage<TMDBMovie>>(
-    `${BASE}/movie/now_playing?language=en-US&page=1`
+    `${BASE}/movie/now_playing?language=en-US&page=${page}`
   );
   return Promise.all(data.results.map(mapMovie));
 }
 
-export async function fetchUpcoming(): Promise<Movie[]> {
+export async function fetchUpcoming(page = 1): Promise<Movie[]> {
   const today = new Date().toISOString().slice(0, 10);
   const todayDate = new Date();
   todayDate.setHours(23, 59, 59, 999);
   const data = await fetchJson<TMDBPage<TMDBMovie>>(
-    `${BASE}/discover/movie?sort_by=release_date.asc&language=en-US&release_date.gte=${today}`
+    `${BASE}/discover/movie?sort_by=release_date.asc&language=en-US&release_date.gte=${today}&page=${page}`
   );
+  if (page > 1) return Promise.all(data.results.filter((m) => new Date(m.release_date) > todayDate).map(mapMovie));
   const base = await Promise.all(data.results.map(mapMovie));
   const extra = await fetchInterleaved(
     `/discover/movie?sort_by=release_date.asc&language=en-US&release_date.gte=${today}`
@@ -154,9 +156,9 @@ export async function fetchUpcoming(): Promise<Movie[]> {
   return all.filter((m) => m.releaseDate && new Date(m.releaseDate) > todayDate);
 }
 
-export async function searchMovies(query: string) {
+export async function searchMovies(query: string, page = 1) {
   const data = await fetchJson<TMDBPage<TMDBMovie>>(
-    `${BASE}/search/movie?query=${encodeURIComponent(query)}&language=en-US&page=1`
+    `${BASE}/search/movie?query=${encodeURIComponent(query)}&language=en-US&page=${page}`
   );
   return Promise.all(data.results.map(mapMovie));
 }
@@ -238,9 +240,9 @@ async function mapTVShow(t: TMDBTVShow) {
   };
 }
 
-export async function fetchTrendingTV() {
+export async function fetchTrendingTV(page = 1) {
   const data = await fetchJson<TMDBPage<TMDBTVShow>>(
-    `${BASE}/trending/tv/week?language=en-US`
+    `${BASE}/trending/tv/week?language=en-US&page=${page}`
   );
   return Promise.all(data.results.map(mapTVShow));
 }

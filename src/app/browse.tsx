@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { fetchPopular, fetchUpcoming } from "../services/api";
 import type { Movie } from "../types/movie";
-import { colors } from "../constants/colors";
+import { useSettings } from "../context/SettingsContext";
 
 const { width } = Dimensions.get("window");
 const GAP = 12;
@@ -55,6 +55,7 @@ const BTN_LEFT: Record<DropdownId, number> = {
 };
 
 export default function BrowseScreen() {
+  const { currentColors: colors } = useSettings();
   const [allMovies, setAllMovies] = useState<Movie[]>([]);
   const [genre, setGenre] = useState<string | null>(null);
   const [year, setYear] = useState<string | null>(null);

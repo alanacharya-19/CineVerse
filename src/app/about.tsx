@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { colors } from "../constants/colors";
+import { useSettings } from "../context/SettingsContext";
 
 const openWhatsApp = () => {
   Linking.openURL("whatsapp://send?phone=919876543210").catch(() => {
@@ -27,6 +27,7 @@ const openGmail = () => {
 };
 
 export default function AboutScreen() {
+  const { currentColors: colors } = useSettings();
   return (
     <View className="flex-1" style={{ backgroundColor: colors.background }}>
       <ScrollView bounces={false} showsVerticalScrollIndicator={false}>

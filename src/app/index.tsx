@@ -16,7 +16,7 @@ import CategoryMovies from "../components/section/CategoryMovies";
 import TrendingMovie from "../components/section/TrendingMovie";
 import UpcomingMovies from "../components/section/UpcomingMovies";
 import Skeleton from "../components/ui/Skeleton";
-import { colors } from "../constants/colors";
+import { useSettings } from "../context/SettingsContext";
 import { fetchPopular, fetchUpcoming } from "../services/api";
 import type { Movie } from "../types/movie";
 
@@ -35,6 +35,7 @@ const menuItems = [
 ];
 
 export default function Index() {
+  const { currentColors: colors } = useSettings();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [trending, setTrending] = useState<Movie[]>([]);
   const [upcoming, setUpcoming] = useState<Movie[]>([]);

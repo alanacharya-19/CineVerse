@@ -3,13 +3,14 @@ import React from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import type { Movie } from "../../types/movie";
-import { colors } from "../../constants/colors";
+import { useSettings } from "../../context/SettingsContext";
 
 type MovieCardProps = {
   movie: Movie;
 };
 
 export default function MovieCard({ movie }: MovieCardProps) {
+  const { currentColors: colors } = useSettings();
   return (
     <TouchableOpacity
       className="flex-1"

@@ -12,11 +12,12 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { fetchTVDetails, fetchSimilarTV } from "../../services/api";
 import type { TVShow } from "../../types/movie";
-import { colors } from "../../constants/colors";
+import { useSettings } from "../../context/SettingsContext";
 
 const { width, height } = Dimensions.get("window");
 
 export default function TVDetailScreen() {
+  const { currentColors: colors } = useSettings();
   const { id } = useLocalSearchParams();
   const navigation = useNavigation();
   const [show, setShow] = useState<TVShow | null>(null);

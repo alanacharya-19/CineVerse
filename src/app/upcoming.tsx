@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { fetchUpcoming } from "../services/api";
-import { colors } from "../constants/colors";
+import { useSettings } from "../context/SettingsContext";
 import type { Movie } from "../types/movie";
 
 const { width } = Dimensions.get("window");
@@ -21,6 +21,7 @@ const CARD_W = (width - H_PADDING * 2 - GAP) / 2;
 const CARD_H = CARD_W * 1.5;
 
 export default function UpcomingScreen() {
+  const { currentColors: colors } = useSettings();
   const [movies, setMovies] = useState<Movie[]>([]);
 
   useEffect(() => {

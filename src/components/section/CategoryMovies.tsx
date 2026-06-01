@@ -11,7 +11,7 @@ import {
   View,
 } from "react-native";
 import type { Movie } from "../../types/movie";
-import { colors } from "../../constants/colors";
+import { useSettings } from "../../context/SettingsContext";
 
 type Props = {
   movies: Movie[];
@@ -69,6 +69,7 @@ const BTN_LEFT: Record<DropdownId, number> = {
 };
 
 export default function CategoryMovies({ movies }: Props) {
+  const { currentColors: colors } = useSettings();
   const [genre, setGenre] = useState<string | null>(null);
   const [year, setYear] = useState<string | null>(null);
   const [rating, setRating] = useState<string | null>(null);

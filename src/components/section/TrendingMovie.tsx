@@ -1,7 +1,7 @@
 import { router } from "expo-router";
 import React from "react";
 import { Dimensions, Text, TouchableOpacity, View } from "react-native";
-import { colors } from "../../constants/colors";
+import { useSettings } from "../../context/SettingsContext";
 import Carousel from "react-native-reanimated-carousel";
 import type { Movie } from "../../types/movie";
 import MovieCard from "../item/MovieCard";
@@ -15,6 +15,7 @@ type Props = {
 };
 
 export default function TrendingMovie({ movies }: Props) {
+  const { currentColors: colors } = useSettings();
   return (
     <View className="">
       <View className="flex-row justify-between items-center mx-4 ">

@@ -3,7 +3,7 @@ import { router } from "expo-router";
 import React from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import type { Movie } from "../../types/movie";
-import { colors } from "../../constants/colors";
+import { useSettings } from "../../context/SettingsContext";
 
 type Props = {
   movies: Movie[];
@@ -13,6 +13,7 @@ const CARD_W = 140;
 const CARD_H = 200;
 
 export default function UpcomingMovies({ movies }: Props) {
+  const { currentColors: colors } = useSettings();
   return (
     <View className="mb-8">
       <View className="flex-row justify-between items-center mx-4 mb-4">

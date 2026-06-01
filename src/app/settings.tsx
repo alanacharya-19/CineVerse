@@ -5,7 +5,6 @@ import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSettings } from "../context/SettingsContext";
 import { requestPermission } from "../services/notifications";
-import { colors } from "../constants/colors";
 
 const LANGUAGES = [
   { code: "en", label: "English" },
@@ -19,7 +18,7 @@ const LANGUAGES = [
 ];
 
 export default function SettingsScreen() {
-  const { settings, setTheme, setLanguage } = useSettings();
+  const { settings, currentColors: colors, setTheme, setLanguage } = useSettings();
   const [permGranted, setPermGranted] = useState(false);
 
   return (

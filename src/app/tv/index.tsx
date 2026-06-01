@@ -12,7 +12,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { fetchTrendingTV } from "../../services/api";
 import type { TVShow } from "../../types/movie";
-import { colors } from "../../constants/colors";
+import { useSettings } from "../../context/SettingsContext";
 
 const { width } = Dimensions.get("window");
 const GAP = 12;
@@ -21,6 +21,7 @@ const CARD_W = (width - H_PADDING * 2 - GAP) / 2;
 const CARD_H = CARD_W * 1.5;
 
 export default function TVShowsScreen() {
+  const { currentColors: colors } = useSettings();
   const [shows, setShows] = useState<TVShow[]>([]);
 
   useEffect(() => {
