@@ -25,6 +25,7 @@ const SIDEBAR_W = width * 0.72;
 
 const menuItems = [
   { label: "Trending", icon: "flame" as const, id: "trending" },
+  { label: "Now Playing", icon: "play" as const, id: "nowplaying" },
   { label: "Upcoming", icon: "calendar" as const, id: "upcoming" },
   { label: "Browse Movies", icon: "film" as const, id: "browse" },
   { label: "Favorites", icon: "heart" as const, id: "favorites" },
@@ -78,6 +79,7 @@ export default function Index() {
   const handleMenuPress = (id: string) => {
     setSidebarOpen(false);
     if (id === "trending") router.push("/trending");
+    else if (id === "nowplaying") router.push("/nowplaying");
     else if (id === "upcoming") router.push("/upcoming");
     else if (id === "browse") router.push("/browse");
     else if (id === "favorites") router.push("/favorites");
