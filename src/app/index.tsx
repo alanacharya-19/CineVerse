@@ -27,6 +27,7 @@ const menuItems = [
   { label: "Trending", icon: "flame" as const, id: "trending" },
   { label: "Upcoming", icon: "calendar" as const, id: "upcoming" },
   { label: "Browse Movies", icon: "film" as const, id: "browse" },
+  { label: "Favorites", icon: "heart" as const, id: "favorites" },
   { label: "About & Help", icon: "information-circle" as const, id: "about" },
 ];
 
@@ -78,6 +79,7 @@ export default function Index() {
     if (id === "trending") router.push("/trending");
     else if (id === "upcoming") router.push("/upcoming");
     else if (id === "browse") router.push("/browse");
+    else if (id === "favorites") router.push("/favorites");
     else if (id === "about") router.push("/about");
   };
 

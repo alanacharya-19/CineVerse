@@ -13,13 +13,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { fetchMovieCredits, fetchMovieRuntime, fetchSimilarMovies } from "../../services/api";
 import type { Movie } from "../../types/movie";
 import { colors } from "../../constants/colors";
+import { useFavorites } from "../../context/FavoritesContext";
 
 const { width, height } = Dimensions.get("window");
 
 export default function MovieDetail() {
   const { id } = useLocalSearchParams();
   const navigation = useNavigation();
-  const [favorited, setFavorited] = useState(false);
+  const { toggleFavorite, isFavorite } = useFavorites();
   const [movie, setMovie] = useState<Movie | null>(null);
   const [director, setDirector] = useState("N/A");
   const [writer, setWriter] = useState("N/A");
@@ -112,14 +113,14 @@ export default function MovieDetail() {
               <Ionicons name="chevron-back" size={20} color={colors.text} />
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() => setFavorited(!favorited)}
+              onPress={() => toggleFavorite(movie.id)}
               className="w-9 h-9 rounded-full items-center justify-center"
               style={{ backgroundColor: colors.iconBg }}
             >
               <Ionicons
-                name={favorited ? "heart" : "heart-outline"}
+                name={isFavorite(movie.id) ? "heart" : "heart-outline"}
                 size={18}
-                color={favorited ? colors.accent : colors.text}
+                color={isFavorite(movie.id) ? colors.accent : colors.text}
               />
             </TouchableOpacity>
           </SafeAreaView>
